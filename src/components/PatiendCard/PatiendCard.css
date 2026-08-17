@@ -1,0 +1,103 @@
+.patient-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.patient-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.patient-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.patient-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.patient-name {
+  flex: 1;
+}
+
+.patient-name h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.patient-name span {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.patient-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-urgent {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.status-ok {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.patient-details {
+  display: flex;
+  gap: 20px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.patient-detail {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.patient-extra {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 18px;
+}
+
+.patient-extra strong {
+  color: #334155;
+  font-size: 13px;
+}
+
+.patient-extra p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
