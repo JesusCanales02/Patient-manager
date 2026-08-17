@@ -1,5 +1,6 @@
 import {Phone, CalendarDays, AlertCircle, CheckCircle} from 'lucide-react'
 import {obtenerEstadoPaciente, formatearFecha} from "../../utils/patientUtils";
+import "./PatientCard.css"
 
 const PatiendCard = ({patient}) =>{
     const status = obtenerEstadoPaciente(patient.nextRefill)

@@ -1,5 +1,5 @@
 import { Pill, Bell } from "lucide-react";
-
+import "./Navbar.css"
 const Navbar = ({ urgentCount }) => {
   return (
     <nav className="navbar">

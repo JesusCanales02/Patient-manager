@@ -1,15 +1,15 @@
 import { useState } from "react";
 import Navbar from "./components/Navbar/Navbar";
 import Dashboard from "./components/Dashboard/Dashboard";
-import { mockPatients } from "./data/mockPatients";
-import { isRefillUrgent } from "./utils/patientUtils";
+import { mockPatients } from "./data/mockPatient";
+import { esRecargaUrgente } from "./utils/patientUtils";
 import "./App.css";
 
 function App() {
   const [patients, setPatients] = useState(mockPatients);
 
   const urgentCount = patients.filter((patient) =>
-    isRefillUrgent(patient.nextRefill)
+    esRecargaUrgente(patient.nextRefill)
   ).length;
 
   return (

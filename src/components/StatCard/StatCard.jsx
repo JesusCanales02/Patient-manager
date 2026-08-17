@@ -1,3 +1,5 @@
+import "./StatCard.css"
+
 const StatCard = ({title, value, icon: Icon, variant = "Default"})=>{
     return(
     <>

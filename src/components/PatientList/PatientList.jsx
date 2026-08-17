@@ -1,4 +1,5 @@
 import PatientCard from "../PatientCard/PatientCard";
+import "./PatientList.css"
 
 const PatientList = ({ patients }) => {
   if (patients.length === 0) {

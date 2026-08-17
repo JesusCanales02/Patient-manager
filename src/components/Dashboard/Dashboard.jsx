@@ -1,16 +1,12 @@
 import { useMemo, useState } from "react";
-import {
-  Users,
-  AlertTriangle,
-  Search,
-  Plus,
-} from "lucide-react";
+import {Users,AlertTriangle,Search,Plus} from "lucide-react";
 
 import StatCard from "../StatCard/StatCard";
 import PatientList from "../PatientList/PatientList";
 import PatientModal from "../PatientModal/PatientModal";
 
-import { isRefillUrgent } from "../../utils/patientUtils";
+import { esRecargaUrgente } from "../../utils/patientUtils";
+import "./Dashboard.css"
 
 const Dashboard = ({ patients, setPatients }) => {
   const [search, setSearch] = useState("");
@@ -18,7 +14,7 @@ const Dashboard = ({ patients, setPatients }) => {
 
   const urgentPatients = useMemo(() => {
     return patients.filter((patient) =>
-      isRefillUrgent(patient.nextRefill)
+      esRecargaUrgente(patient.nextRefill)
     );
   }, [patients]);
 
