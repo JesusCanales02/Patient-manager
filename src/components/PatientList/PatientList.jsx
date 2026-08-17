@@ -1,7 +1,7 @@
 import PatientCard from "../PatientCard/PatientCard";
 import "./PatientList.css"
 
-const PatientList = ({ patients }) => {
+const PatientList = ({ patients,onUpdatePatient, onCompleteRefill }) => {
   if (patients.length === 0) {
     return (
       <div className="empty-state">
@@ -14,11 +14,13 @@ const PatientList = ({ patients }) => {
   }
 
   return (
-    <div className="patient-grid">
+    <div className="patients-grid">
       {patients.map((patient) => (
         <PatientCard
           key={patient.id}
           patient={patient}
+          onUpdatePatient={onUpdatePatient}
+          onCompleteRefill={onCompleteRefill}
         />
       ))}
     </div>
