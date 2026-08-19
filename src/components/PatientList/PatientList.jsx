@@ -1,16 +1,19 @@
-import PatientCard from "../PatientCard/PatientCard";
+import PatientCard from "../PatientCard/PatientCard"
 import "./PatientList.css"
 
-const PatientList = ({ patients,onUpdatePatient, onCompleteRefill }) => {
+const PatientList = ({
+  patients,
+  onUpdatePatient,
+  onCompleteRefill,
+  onDeletePatient,
+  onToggleHide,
+}) => {
   if (patients.length === 0) {
     return (
       <div className="empty-state">
-        <h3>No se encontraron pacientes</h3>
-        <p>
-          Intenta buscar con otro nombre o diagnóstico.
-        </p>
+        <h3>No hay pacientes ocultos</h3>
       </div>
-    );
+    )
   }
 
   return (
@@ -21,10 +24,12 @@ const PatientList = ({ patients,onUpdatePatient, onCompleteRefill }) => {
           patient={patient}
           onUpdatePatient={onUpdatePatient}
           onCompleteRefill={onCompleteRefill}
+          onDeletePatient={onDeletePatient}
+          onToggleHide={onToggleHide}
         />
       ))}
     </div>
-  );
-};
+  )
+}
 
 export default PatientList;

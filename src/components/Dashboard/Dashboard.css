@@ -115,3 +115,56 @@
     width: auto;
   }
 }
+
+/* Encabezado de la sección de pacientes */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Agrupa botones de filtro y el buscador de forma horizontal */
+.controls-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Contenedor de las pestañas/botones de filtro */
+.filter-buttons {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Estilo individual de cada botón */
+.filter-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  color: #1e293b;
+}
+
+/* Estado activo del botón */
+.filter-btn.active {
+  background-color: #ffffff;
+  color: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
