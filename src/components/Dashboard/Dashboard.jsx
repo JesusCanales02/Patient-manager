@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Users, AlertTriangle, Search, Plus, EyeOff } from "lucide-react";
 
 import StatCard from "../StatCard/StatCard";
@@ -8,10 +8,46 @@ import PatientModal from "../PatientModal/PatientModal";
 import { esRecargaUrgente } from "../../utils/patientUtils";
 import "./Dashboard.css";
 
-const Dashboard = ({ patients, setPatients }) => {
+const API_URL = "http://127.0.0.1:5000/api/patients";
+
+const Dashboard = () => {
+  const [patients, setPatients] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [viewFilter, setViewFilter] = useState("active");
+
+  // 1. Cargar pacientes desde MySQL al iniciar
+  const fetchPatients = async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      setPatients(data);
+    } catch (err) {
+      console.error("Error al cargar pacientes:", err);
+    }
+  };
+
+useEffect(() => {
+  let isMounted = true;
+
+  const getPatientsData = async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      if (isMounted) {
+        setPatients(data);
+      }
+    } catch (err) {
+      console.error("Error al cargar pacientes:", err);
+    }
+  };
+
+  getPatientsData();
+
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
   const urgentPatients = useMemo(() => {
     return patients.filter((p) => esRecargaUrgente(p.nextRefill));
@@ -35,41 +71,89 @@ const Dashboard = ({ patients, setPatients }) => {
     });
   }, [patients, search, viewFilter]);
 
-  const handleToggleHide = (id) => {
-    setPatients((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, hidden: !p.hidden } : p))
-    );
+  // 2. Alternar oculto/visible (PUT)
+  const handleToggleHide = async (id) => {
+    const patient = patients.find((p) => p.id === id);
+    if (!patient) return;
+
+    const updatedPatient = { ...patient, hidden: !patient.hidden };
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPatient),
+      });
+      if (res.ok) fetchPatients();
+    } catch (err) {
+      console.error("Error al actualizar:", err);
+    }
   };
 
-  const handleDeletePatient = (id) => {
-    setPatients((prev) => prev.filter((p) => p.id !== id));
+  // 3. Eliminar paciente (DELETE)
+  const handleDeletePatient = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) fetchPatients();
+    } catch (err) {
+      console.error("Error al eliminar:", err);
+    }
   };
 
-  const handleAddPatient = (newPatient) => {
-    setPatients((prev) => [...prev, newPatient]);
+  // 4. Agregar paciente (POST)
+  const handleAddPatient = async (newPatient) => {
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPatient),
+      });
+      if (res.ok) fetchPatients();
+    } catch (err) {
+      console.error("Error al agregar:", err);
+    }
   };
 
-  const handleUpdatePatient = (updated) => {
-    setPatients((prev) =>
-      prev.map((p) => (p.id === updated.id ? updated : p))
-    );
+  // 5. Actualizar información de paciente (PUT)
+  const handleUpdatePatient = async (updated) => {
+    try {
+      const res = await fetch(`${API_URL}/${updated.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      if (res.ok) fetchPatients();
+    } catch (err) {
+      console.error("Error al actualizar:", err);
+    }
   };
 
-  const handleCompleteRefill = (id) => {
-    setPatients((prev) =>
-      prev.map((p) => {
-        if (p.id !== id) return p;
+  // 6. Completar recarga (PUT)
+  const handleCompleteRefill = async (id) => {
+    const patient = patients.find((p) => p.id === id);
+    if (!patient) return;
 
-        const nextDate = new Date();
-        nextDate.setDate(nextDate.getDate() + 30);
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + 30);
 
-        return {
-          ...p,
-          nextRefill: nextDate.toISOString().split("T")[0],
-          hidden: true,
-        };
-      })
-    );
+    const updatedPatient = {
+      ...patient,
+      nextRefill: nextDate.toISOString().split("T")[0],
+      hidden: true,
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPatient),
+      });
+      if (res.ok) fetchPatients();
+    } catch (err) {
+      console.error("Error al completar recarga:", err);
+    }
   };
 
   return (
