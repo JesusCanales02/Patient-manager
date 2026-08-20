@@ -1,51 +1,68 @@
-import { useState } from "react"
-import { X, Plus } from "lucide-react"
-import "./PatientModal.css"
+import { useState } from "react";
+import { X, Plus } from "lucide-react";
+import "./PatientModal.css";
+
+const INITIAL_FORM = {
+  name: "",
+  age: "",
+  gender: "", // Vacío por defecto
+  phone: "",
+  diagnosis: "",
+  nextRefill: "",
+  notes: "",
+};
 
 const PatientModal = ({ onClose, onAddPatient }) => {
-  const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
-  const [diagnosis, setDiagnosis] = useState("")
-  const [nextRefill, setNextRefill] = useState("")
-  const [notes, setNotes] = useState("")
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [allergies, setAllergies] = useState([""]);
 
-  const [allergies, setAllergies] = useState([""])
-
-  const handleAllergyChange = (index, value) => {
-    const updated = [...allergies]
-    updated[index] = value
-    setAllergies(updated)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddAllergyInput = () => {
-    setAllergies([...allergies, ""])
+  const handleGenderSelect = (genderValue) => {
+    // Si vuelve a presionar el mismo género, lo deselecciona (toggle)
+    setFormData((prev) => ({
+      ...prev,
+      gender: prev.gender === genderValue ? "" : genderValue,
+    }));
   };
 
-  const handleRemoveAllergyInput = (index) => {
-    setAllergies(allergies.filter((_, i) => i !== index))
+  const handleAllergyChange = (idx, value) => {
+    const updated = [...allergies];
+    updated[idx] = value;
+    setAllergies(updated);
+  };
+
+  const addAllergy = () => setAllergies((prev) => [...prev, ""]);
+
+  const removeAllergy = (idx) => {
+    setAllergies((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     const cleanAllergies = allergies
-      .map((item) => item.trim())
-      .filter((item) => item !== "")
-      .join(", ")
+      .map((a) => a.trim())
+      .filter(Boolean)
+      .join(", ");
 
-    const newPatient = {
+    onAddPatient({
       id: Date.now(),
-      name: name.trim() || "Sin nombre",
-      phone: phone.trim() || null,
-      diagnosis: diagnosis.trim() || null,
-      nextRefill: nextRefill || null,
+      name: formData.name.trim() || "Sin nombre",
+      age: formData.age ? parseInt(formData.age, 10) : "No decir",
+      gender: formData.gender || "No decir",
+      phone: formData.phone.trim() || "Sin teléfono",
+      diagnosis: formData.diagnosis.trim() || "Sin diagnóstico",
+      nextRefill: formData.nextRefill || "No asignada",
       allergies: cleanAllergies || "Ninguna",
-      notes: notes.trim() || null,
-    }
+      notes: formData.notes.trim() || "Sin notas",
+    });
 
-    onAddPatient(newPatient);
     onClose();
-  }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -62,19 +79,56 @@ const PatientModal = ({ onClose, onAddPatient }) => {
             <label>Nombre del paciente</label>
             <input
               type="text"
+              name="name"
               placeholder="Ej. Rosa Flores"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={formData.name}
+              onChange={handleChange}
             />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Edad</label>
+              <input
+                type="number"
+                name="age"
+                placeholder="Ej. 45"
+                min="0"
+                max="120"
+                value={formData.age}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Género</label>
+              <div className="gender-selector">
+                <button
+                  type="button"
+                  className={`gender-btn ${formData.gender === "Masculino" ? "active" : ""}`}
+                  onClick={() => handleGenderSelect("Masculino")}
+                >
+                  Masculino
+                </button>
+                <button
+                  type="button"
+                  className={`gender-btn ${formData.gender === "Femenino" ? "active" : ""}`}
+                  onClick={() => handleGenderSelect("Femenino")}
+                >
+                  Femenino
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="form-group">
             <label>Teléfono</label>
             <input
               type="text"
+              name="phone"
               placeholder="646-000-00-00"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={formData.phone}
+              onChange={handleChange}
             />
           </div>
 
@@ -82,38 +136,35 @@ const PatientModal = ({ onClose, onAddPatient }) => {
             <label>Diagnóstico principal</label>
             <input
               type="text"
+              name="diagnosis"
               placeholder="Ej. Tiene fiebre"
-              value={diagnosis}
-              onChange={(e) => setDiagnosis(e.target.value)}
+              value={formData.diagnosis}
+              onChange={handleChange}
             />
           </div>
 
           <div className="form-group">
             <label>Alergias</label>
-            {allergies.map((allergy, index) => (
-              <div key={index} className="allergy-field-row">
+            {allergies.map((allergy, i) => (
+              <div key={i} className="allergy-field-row">
                 <input
                   type="text"
-                  placeholder={`Alergia ${index + 1}`}
+                  placeholder={`Alergia ${i + 1}`}
                   value={allergy}
-                  onChange={(e) => handleAllergyChange(index, e.target.value)}
+                  onChange={(e) => handleAllergyChange(i, e.target.value)}
                 />
                 {allergies.length > 1 && (
                   <button
                     type="button"
                     className="btn-remove-field"
-                    onClick={() => handleRemoveAllergyInput(index)}
+                    onClick={() => removeAllergy(i)}
                   >
                     <X size={16} />
                   </button>
                 )}
               </div>
             ))}
-            <button
-              type="button"
-              className="btn-add-field"
-              onClick={handleAddAllergyInput}
-            >
+            <button type="button" className="btn-add-field" onClick={addAllergy}>
               <Plus size={16} /> Agregar otra alergia
             </button>
           </div>
@@ -122,17 +173,19 @@ const PatientModal = ({ onClose, onAddPatient }) => {
             <label>Próxima recarga</label>
             <input
               type="date"
-              value={nextRefill}
-              onChange={(e) => setNextRefill(e.target.value)}
+              name="nextRefill"
+              value={formData.nextRefill}
+              onChange={handleChange}
             />
           </div>
 
           <div className="form-group">
             <label>Notas / Observaciones</label>
             <textarea
+              name="notes"
               placeholder="Información adicional..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              value={formData.notes}
+              onChange={handleChange}
             />
           </div>
 
@@ -150,4 +203,4 @@ const PatientModal = ({ onClose, onAddPatient }) => {
   );
 };
 
-export default PatientModal
+export default PatientModal;

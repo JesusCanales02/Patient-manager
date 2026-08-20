@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Edit, Trash2, Eye, EyeOff, Calendar, Phone, Plus, X } from "lucide-react";
+import { Check, Edit, Trash2, Eye, EyeOff, Calendar, Phone, Plus, X, User } from "lucide-react";
 import { esRecargaUrgente } from "../../utils/patientUtils";
 import "./PatientCard.css";
 
@@ -64,6 +64,8 @@ const PatientCard = ({
 
     onUpdatePatient({
       ...formData,
+      age: formData.age ? formData.age : "No decir",
+      gender: formData.gender || "No decir",
       phone: finalPhone,
       allergies: cleanAllergies,
     });
@@ -78,6 +80,8 @@ const PatientCard = ({
     setFormData({
       ...patient,
       name: patient.name || "",
+      age: patient.age === "No decir" ? "" : patient.age || "",
+      gender: patient.gender === "No decir" ? "" : patient.gender || "",
       diagnosis: patient.diagnosis || "",
       phone: rawPhone.replace(/\D/g, ""),
       nextRefill: patient.nextRefill || "",
@@ -89,6 +93,11 @@ const PatientCard = ({
   };
 
   const displayAllergies = parseAllergies(patient.allergies).join(", ");
+
+  const formatAge = (age) => {
+    if (!age || age === "No decir") return "Edad: No decir";
+    return `${age} años`;
+  };
 
   return (
     <div className={`patient-card ${patient.hidden ? "patient-card-hidden" : ""}`}>
@@ -107,7 +116,9 @@ const PatientCard = ({
               {patient.name ? patient.name.charAt(0).toUpperCase() : "?"}
             </div>
             <div className="patient-name">
-              <h3>{patient.name || "Sin nombre"}</h3>
+              <h3>
+                {patient.name || "Sin nombre"} ({formatAge(patient.age)})
+              </h3>
               <span>{patient.diagnosis || "Sin diagnóstico"}</span>
             </div>
             <span className={`patient-status ${isUrgent ? "status-urgent" : "status-ok"}`}>
@@ -116,6 +127,10 @@ const PatientCard = ({
           </div>
 
           <div className="patient-details">
+            <div className="patient-detail">
+              <User size={16} />
+              <span>Género: {patient.gender || "No decir"}</span>
+            </div>
             <div className="patient-detail">
               <Phone size={16} />
               <span>{patient.phone || "Sin teléfono"}</span>
@@ -184,6 +199,44 @@ const PatientCard = ({
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Nombre"
           />
+
+          <div className="edit-row">
+            <input
+              type="number"
+              value={formData.age || ""}
+              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+              placeholder="Edad (dejar vacío para 'No decir')"
+              min="0"
+              max="120"
+            />
+            <div className="gender-selector">
+              <button
+                type="button"
+                className={`gender-btn ${formData.gender === "Masculino" ? "active" : ""}`}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    gender: prev.gender === "Masculino" ? "" : "Masculino",
+                  }))
+                }
+              >
+                Masculino
+              </button>
+              <button
+                type="button"
+                className={`gender-btn ${formData.gender === "Femenino" ? "active" : ""}`}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    gender: prev.gender === "Femenino" ? "" : "Femenino",
+                  }))
+                }
+              >
+                Femenino
+              </button>
+            </div>
+          </div>
+
           <input
             type="text"
             value={formData.diagnosis || ""}
