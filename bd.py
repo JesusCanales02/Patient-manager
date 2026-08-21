@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+# CORS abierto para permitir peticiones desde cualquier origen en producción
+CORS(app)
 
 db_pool = mysql.connector.pooling.MySQLConnectionPool(
     pool_name="mypool",
@@ -17,7 +18,8 @@ db_pool = mysql.connector.pooling.MySQLConnectionPool(
     host=os.getenv("DB_HOST", "localhost"),
     user=os.getenv("DB_USER", "root"),
     password=os.getenv("DB_PASSWORD", ""),
-    database=os.getenv("DB_NAME", "farmacia_db")
+    database=os.getenv("DB_NAME", "farmacia_db"),
+    port=int(os.getenv("DB_PORT", 3306))
 )
 
 def get_db_connection():
@@ -156,4 +158,4 @@ def delete_patient(patient_id):
 
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
-    app.run(host='127.0.0.1', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False)
