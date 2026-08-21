@@ -7,14 +7,14 @@ app = Flask(__name__)
 CORS(app)
 
 def get_db_connection():
-    # Conexión pura SSL con PyMySQL compatible con MySQL 8.4
+    # Conexión limpia con PyMySQL desactivando verificación SSL estricta
     connection = pymysql.connect(
         host=os.environ.get('DB_HOST'),
         user=os.environ.get('DB_USER'),
         password=os.environ.get('DB_PASSWORD'),
         database=os.environ.get('DB_NAME'),
         port=int(os.environ.get('DB_PORT', 3306)),
-        ssl={'ssl': True},
+        ssl={'ssl_check_hostname': False, 'ssl_mode': 'REQUIRED'},
         cursorclass=pymysql.cursors.DictCursor
     )
     
