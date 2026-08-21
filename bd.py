@@ -2,23 +2,38 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
-from dotenv import load_dotenv
-
-load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  
 
 def get_db_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "farmacia_db"),
-        port=int(os.getenv("DB_PORT", 3306)),
-        ssl_disabled=False,
-        ssl_verify_cert=False
+    connection = mysql.connector.connect(
+        host=os.environ.get('DB_HOST'),
+        user=os.environ.get('DB_USER'),
+        password=os.environ.get('DB_PASSWORD'),
+        database=os.environ.get('DB_NAME'),
+        port=int(os.environ.get('DB_PORT', 3306))
     )
+    
+    cursor = connection.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS patients (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            age VARCHAR(50),
+            gender VARCHAR(50),
+            phone VARCHAR(50),
+            diagnosis TEXT,
+            allergies TEXT,
+            nextRefill VARCHAR(50),
+            notes TEXT,
+            hidden TINYINT(1) DEFAULT 0
+        )
+    """)
+    connection.commit()
+    cursor.close()
+    
+    return connection
 
 @app.route('/api/patients', methods=['GET'])
 def get_patients():
@@ -34,99 +49,81 @@ def get_patients():
             
         cursor.close()
         return jsonify(patients), 200
-
-    except mysql.connector.Error as err:
+    except Exception as err:
         print(f"Error MySQL: {err}")
-        return jsonify({"error": "Error interno al consultar datos"}), 500
+        return jsonify({"error": str(err)}), 500
     finally:
         if db:
-            db.close() 
+            db.close()
 
 @app.route('/api/patients', methods=['POST'])
 def add_patient():
-    data = request.json
-    
-    if not data or not data.get('name') or not str(data.get('name')).strip():
-        return jsonify({"error": "El nombre del paciente es obligatorio"}), 400
-
     db = None
     try:
+        data = request.json
         db = get_db_connection()
         cursor = db.cursor()
         
-        sql = """INSERT INTO patients (name, age, gender, phone, diagnosis, allergies, nextRefill, notes, hidden)
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-                 
-        allergies = ", ".join(data.get('allergies', [])) if isinstance(data.get('allergies'), list) else str(data.get('allergies', 'Ninguna'))
-        hidden = 1 if data.get('hidden') else 0
-        
+        query = """
+            INSERT INTO patients (name, age, gender, phone, diagnosis, allergies, nextRefill, notes, hidden)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
         values = (
-            str(data.get('name')).strip(),
-            str(data.get('age', 'No decir')),
-            str(data.get('gender', 'No decir')),
-            str(data.get('phone', 'Sin teléfono')),
-            str(data.get('diagnosis', 'Sin diagnóstico')),
-            allergies,
-            str(data.get('nextRefill', 'No asignada')),
-            str(data.get('notes', 'Sin notas')),
-            hidden
+            data.get('name'),
+            data.get('age'),
+            data.get('gender'),
+            data.get('phone'),
+            data.get('diagnosis'),
+            data.get('allergies'),
+            data.get('nextRefill'),
+            data.get('notes'),
+            int(data.get('hidden', False))
         )
         
-        cursor.execute(sql, values)
+        cursor.execute(query, values)
         db.commit()
-        new_id = cursor.lastrowid
-        
         cursor.close()
-        data['id'] = new_id
-        return jsonify(data), 201
-
-    except mysql.connector.Error as err:
-        print(f"Error MySQL al insertar: {err}")
-        return jsonify({"error": "Error de persistencia en base de datos"}), 500
+        return jsonify({"message": "Paciente agregado exitosamente"}), 201
+    except Exception as err:
+        print(f"Error MySQL: {err}")
+        return jsonify({"error": str(err)}), 500
     finally:
         if db:
             db.close()
 
 @app.route('/api/patients/<int:patient_id>', methods=['PUT'])
 def update_patient(patient_id):
-    data = request.json
-    if not data:
-        return jsonify({"error": "Payload inválido"}), 400
-
     db = None
     try:
+        data = request.json
         db = get_db_connection()
         cursor = db.cursor()
         
-        sql = """UPDATE patients 
-                 SET name=%s, age=%s, gender=%s, phone=%s, diagnosis=%s, allergies=%s, nextRefill=%s, notes=%s, hidden=%s 
-                 WHERE id=%s"""
-                 
-        allergies = ", ".join(data.get('allergies', [])) if isinstance(data.get('allergies'), list) else str(data.get('allergies', 'Ninguna'))
-        hidden = 1 if data.get('hidden') else 0
-        
+        query = """
+            UPDATE patients 
+            SET name=%s, age=%s, gender=%s, phone=%s, diagnosis=%s, allergies=%s, nextRefill=%s, notes=%s, hidden=%s
+            WHERE id=%s
+        """
         values = (
-            str(data.get('name')).strip(),
-            str(data.get('age')),
-            str(data.get('gender')),
-            str(data.get('phone')),
-            str(data.get('diagnosis')),
-            allergies,
-            str(data.get('nextRefill')),
-            str(data.get('notes')),
-            hidden,
+            data.get('name'),
+            data.get('age'),
+            data.get('gender'),
+            data.get('phone'),
+            data.get('diagnosis'),
+            data.get('allergies'),
+            data.get('nextRefill'),
+            data.get('notes'),
+            int(data.get('hidden', False)),
             patient_id
         )
         
-        cursor.execute(sql, values)
+        cursor.execute(query, values)
         db.commit()
         cursor.close()
-        
-        return jsonify({"success": True}), 200
-
-    except mysql.connector.Error as err:
-        print(f"Error MySQL al actualizar: {err}")
-        return jsonify({"error": "No se pudo actualizar el registro"}), 500
+        return jsonify({"message": "Paciente actualizado"}), 200
+    except Exception as err:
+        print(f"Error MySQL: {err}")
+        return jsonify({"error": str(err)}), 500
     finally:
         if db:
             db.close()
@@ -137,20 +134,17 @@ def delete_patient(patient_id):
     try:
         db = get_db_connection()
         cursor = db.cursor()
-        
         cursor.execute("DELETE FROM patients WHERE id = %s", (patient_id,))
         db.commit()
         cursor.close()
-        
-        return jsonify({"success": True}), 200
-
-    except mysql.connector.Error as err:
-        print(f"Error MySQL al eliminar: {err}")
-        return jsonify({"error": "No se pudo eliminar el registro"}), 500
+        return jsonify({"message": "Paciente eliminado"}), 200
+    except Exception as err:
+        print(f"Error MySQL: {err}")
+        return jsonify({"error": str(err)}), 500
     finally:
         if db:
             db.close()
 
 if __name__ == '__main__':
-    port = int(os.getenv("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
