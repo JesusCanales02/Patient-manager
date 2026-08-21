@@ -37,6 +37,11 @@ def init_db():
 
 init_db()
 
+def format_allergies(allergies_data):
+    if isinstance(allergies_data, list):
+        return ", ".join(map(str, allergies_data))
+    return str(allergies_data or '')
+
 @app.route('/api/patients', methods=['GET'])
 def get_patients():
     try:
@@ -65,7 +70,7 @@ def add_patient():
             str(data.get('gender', '')),
             str(data.get('phone', '')),
             str(data.get('diagnosis', '')),
-            str(data.get('allergies', '')),
+            format_allergies(data.get('allergies')),
             str(data.get('nextRefill', '')),
             str(data.get('notes', '')),
             1 if data.get('hidden') else 0
@@ -82,8 +87,6 @@ def update_patient(patient_id):
         data = request.json or {}
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        # Se omitió el 'id' en el SET para evitar choques en SQLite
         cursor.execute("""
             UPDATE patients
             SET name=?, age=?, gender=?, phone=?, diagnosis=?, allergies=?, nextRefill=?, notes=?, hidden=?
@@ -94,7 +97,7 @@ def update_patient(patient_id):
             str(data.get('gender', '')),
             str(data.get('phone', '')),
             str(data.get('diagnosis', '')),
-            str(data.get('allergies', '')),
+            format_allergies(data.get('allergies')),
             str(data.get('nextRefill', '')),
             str(data.get('notes', '')),
             1 if data.get('hidden') else 0,
