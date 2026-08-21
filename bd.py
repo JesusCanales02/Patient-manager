@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres.dgbanpalylbtmaihrfib:farmacia123!@aws-0-us-west-2.pooler.supabase.com:6543/postgres')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
