@@ -53,16 +53,22 @@ def get_patients():
 @app.route('/api/patients', methods=['POST'])
 def add_patient():
     try:
-        data = request.json
+        data = request.json or {}
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO patients (name, age, gender, phone, diagnosis, allergies, nextRefill, notes, hidden)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            data.get('name'), data.get('age'), data.get('gender'), data.get('phone'),
-            data.get('diagnosis'), data.get('allergies'), data.get('nextRefill'),
-            data.get('notes'), 1 if data.get('hidden') else 0
+            str(data.get('name', '')),
+            str(data.get('age', '')),
+            str(data.get('gender', '')),
+            str(data.get('phone', '')),
+            str(data.get('diagnosis', '')),
+            str(data.get('allergies', '')),
+            str(data.get('nextRefill', '')),
+            str(data.get('notes', '')),
+            1 if data.get('hidden') else 0
         ))
         conn.commit()
         conn.close()
@@ -73,17 +79,26 @@ def add_patient():
 @app.route('/api/patients/<int:patient_id>', methods=['PUT'])
 def update_patient(patient_id):
     try:
-        data = request.json
+        data = request.json or {}
         conn = get_db_connection()
         cursor = conn.cursor()
+        
+        # Se omitió el 'id' en el SET para evitar choques en SQLite
         cursor.execute("""
             UPDATE patients
             SET name=?, age=?, gender=?, phone=?, diagnosis=?, allergies=?, nextRefill=?, notes=?, hidden=?
             WHERE id=?
         """, (
-            data.get('name'), data.get('age'), data.get('gender'), data.get('phone'),
-            data.get('diagnosis'), data.get('allergies'), data.get('nextRefill'),
-            data.get('notes'), 1 if data.get('hidden') else 0, patient_id
+            str(data.get('name', '')),
+            str(data.get('age', '')),
+            str(data.get('gender', '')),
+            str(data.get('phone', '')),
+            str(data.get('diagnosis', '')),
+            str(data.get('allergies', '')),
+            str(data.get('nextRefill', '')),
+            str(data.get('notes', '')),
+            1 if data.get('hidden') else 0,
+            patient_id
         ))
         conn.commit()
         conn.close()
@@ -103,7 +118,6 @@ def delete_patient(patient_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# RUTA PARA VER LOS DATOS EN EL NAVEGADOR
 @app.route('/admin', methods=['GET'])
 def admin_view():
     try:
@@ -119,7 +133,7 @@ def admin_view():
             for row in rows:
                 html += "<tr>" + "".join([f"<td>{val if val is not None else ''}</td>" for val in row]) + "</tr>"
         else:
-            html += "<tr><td>No hay pacientes registrados en la base de datos.</td></tr>"
+            html += "<tr><td>No hay pacientes registrados.</td></tr>"
         html += "</table>"
         return html, 200
     except Exception as e:
