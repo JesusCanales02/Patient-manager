@@ -7,17 +7,15 @@ app = Flask(__name__)
 CORS(app)
 
 def get_db_connection():
-    # Se agrega ssl_mode='REQUIRED' para cumplir la seguridad de Aiven
     connection = mysql.connector.connect(
         host=os.environ.get('DB_HOST'),
         user=os.environ.get('DB_USER'),
         password=os.environ.get('DB_PASSWORD'),
         database=os.environ.get('DB_NAME'),
         port=int(os.environ.get('DB_PORT', 3306)),
-        ssl_mode='REQUIRED'
+        ssl_mode='REQUIRED'  # Conexión SSL segura para Aiven
     )
     
-    # Crea la tabla automáticamente si no existe
     cursor = connection.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS patients (
