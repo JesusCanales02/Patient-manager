@@ -13,7 +13,7 @@ def get_db_connection():
         password=os.environ.get('DB_PASSWORD'),
         database=os.environ.get('DB_NAME'),
         port=int(os.environ.get('DB_PORT', 3306)),
-        ssl_mode='REQUIRED'  # Conexión SSL segura para Aiven
+        ssl_disabled=False  # Habilita SSL sin usar 'ssl_mode'
     )
     
     cursor = connection.cursor()
