@@ -103,5 +103,27 @@ def delete_patient(patient_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# RUTA PARA VER LOS DATOS EN EL NAVEGADOR
+@app.route('/admin', methods=['GET'])
+def admin_view():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM patients")
+        rows = cursor.fetchall()
+        conn.close()
+        
+        html = "<h2>Base de Datos - Pacientes Registrados</h2><table border='1' cellpadding='8' style='border-collapse:collapse; font-family:sans-serif;'>"
+        if rows:
+            html += "<tr style='background-color:#f2f2f2;'>" + "".join([f"<th>{col}</th>" for col in rows[0].keys()]) + "</tr>"
+            for row in rows:
+                html += "<tr>" + "".join([f"<td>{val if val is not None else ''}</td>" for val in row]) + "</tr>"
+        else:
+            html += "<tr><td>No hay pacientes registrados en la base de datos.</td></tr>"
+        html += "</table>"
+        return html, 200
+    except Exception as e:
+        return f"Error leyendo base de datos: {str(e)}", 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
