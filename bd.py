@@ -2,29 +2,23 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
-from mysql.connector import pooling
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
-# CORS abierto para permitir peticiones desde cualquier origen en producción
 CORS(app)
 
-db_pool = mysql.connector.pooling.MySQLConnectionPool(
-    pool_name="mypool",
-    pool_size=5,
-    pool_reset_session=True,
-    host=os.getenv("DB_HOST", "localhost"),
-    user=os.getenv("DB_USER", "root"),
-    password=os.getenv("DB_PASSWORD", ""),
-    database=os.getenv("DB_NAME", "farmacia_db"),
-    port=int(os.getenv("DB_PORT", 3306)),
-    ssl_disabled=False
-)
-
 def get_db_connection():
-    return db_pool.get_connection()
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "farmacia_db"),
+        port=int(os.getenv("DB_PORT", 3306)),
+        ssl_disabled=False,
+        ssl_verify_cert=False
+    )
 
 @app.route('/api/patients', methods=['GET'])
 def get_patients():
