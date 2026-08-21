@@ -1,15 +1,17 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-DB_NAME = "farmacia.db"
+# PEGA AQUÍ LA CADENA QUE COPIASTE DE SUPABASE
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres.dgbanpalylbtmaihrfib:farmacia123!@aws-0-us-west-2.pooler.supabase.com:6543/postgres')
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
 
 def init_db():
@@ -18,7 +20,7 @@ def init_db():
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS patients (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 age TEXT,
                 gender TEXT,
@@ -27,13 +29,15 @@ def init_db():
                 allergies TEXT,
                 nextRefill TEXT,
                 notes TEXT,
-                hidden INTEGER DEFAULT 0
+                hidden INT DEFAULT 0
             )
         """)
         conn.commit()
+        cursor.close()
         conn.close()
+        print("Tabla patients verificada/creada en Supabase")
     except Exception as e:
-        print(f"Error iniciando SQLite: {e}")
+        print(f"Error iniciando Supabase: {e}")
 
 init_db()
 
@@ -47,11 +51,11 @@ def get_patients():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM patients")
+        cursor.execute("SELECT * FROM patients ORDER BY id ASC")
         rows = cursor.fetchall()
+        cursor.close()
         conn.close()
-        patients = [dict(row) for row in rows]
-        return jsonify(patients), 200
+        return jsonify(rows), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -63,7 +67,7 @@ def add_patient():
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO patients (name, age, gender, phone, diagnosis, allergies, nextRefill, notes, hidden)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             str(data.get('name', '')),
             str(data.get('age', '')),
@@ -76,6 +80,7 @@ def add_patient():
             1 if data.get('hidden') else 0
         ))
         conn.commit()
+        cursor.close()
         conn.close()
         return jsonify({'message': 'Paciente creado'}), 201
     except Exception as e:
@@ -89,8 +94,8 @@ def update_patient(patient_id):
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE patients
-            SET name=?, age=?, gender=?, phone=?, diagnosis=?, allergies=?, nextRefill=?, notes=?, hidden=?
-            WHERE id=?
+            SET name=%s, age=%s, gender=%s, phone=%s, diagnosis=%s, allergies=%s, nextRefill=%s, notes=%s, hidden=%s
+            WHERE id=%s
         """, (
             str(data.get('name', '')),
             str(data.get('age', '')),
@@ -104,6 +109,7 @@ def update_patient(patient_id):
             patient_id
         ))
         conn.commit()
+        cursor.close()
         conn.close()
         return jsonify({'message': 'Paciente actualizado'}), 200
     except Exception as e:
@@ -114,8 +120,9 @@ def delete_patient(patient_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM patients WHERE id = ?", (patient_id,))
+        cursor.execute("DELETE FROM patients WHERE id = %s", (patient_id,))
         conn.commit()
+        cursor.close()
         conn.close()
         return jsonify({'message': 'Paciente eliminado'}), 200
     except Exception as e:
@@ -126,15 +133,16 @@ def admin_view():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM patients")
+        cursor.execute("SELECT * FROM patients ORDER BY id ASC")
         rows = cursor.fetchall()
+        cursor.close()
         conn.close()
         
-        html = "<h2>Base de Datos - Pacientes Registrados</h2><table border='1' cellpadding='8' style='border-collapse:collapse; font-family:sans-serif;'>"
+        html = "<h2>Base de Datos Supabase - Pacientes</h2><table border='1' cellpadding='8' style='border-collapse:collapse; font-family:sans-serif;'>"
         if rows:
             html += "<tr style='background-color:#f2f2f2;'>" + "".join([f"<th>{col}</th>" for col in rows[0].keys()]) + "</tr>"
             for row in rows:
-                html += "<tr>" + "".join([f"<td>{val if val is not None else ''}</td>" for val in row]) + "</tr>"
+                html += "<tr>" + "".join([f"<td>{val if val is not None else ''}</td>" for val in row.values()]) + "</tr>"
         else:
             html += "<tr><td>No hay pacientes registrados.</td></tr>"
         html += "</table>"
