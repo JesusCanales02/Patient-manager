@@ -62,25 +62,31 @@ const Dashboard = () => {
 
   const urgentPatients = useMemo(() => {
     if (!Array.isArray(patients)) return [];
-    return patients.filter((p) => esRecargaUrgente(p.nextRefill));
+    return patients.filter((p) => esRecargaUrgente(p.nextRefill) && !p.hidden);
   }, [patients]);
 
+  // FILTRADO INTELIGENTE DE PACIENTES
   const filteredPatients = useMemo(() => {
     if (!Array.isArray(patients)) return [];
     const q = search.toLowerCase().trim();
 
     return patients.filter((p) => {
       const isUrgent = esRecargaUrgente(p.nextRefill);
+      const nameMatch = p.name?.toLowerCase().includes(q);
+      const diagMatch = p.diagnosis?.toLowerCase().includes(q);
+      const matchesSearch = nameMatch || diagMatch;
 
+      // SI HAY BÚSQUEDA ACTIVA: Busca en TODOS (activos y archivados/eliminados)
+      if (q !== "") {
+        return matchesSearch;
+      }
+
+      // SI NO HAY BÚSQUEDA: Respeta los filtros normales de botones
       if (viewFilter === "active" && p.hidden) return false;
       if (viewFilter === "urgent" && (!isUrgent || p.hidden)) return false;
       if (viewFilter === "hidden" && !p.hidden) return false;
 
-      if (!q) return true;
-
-      const nameMatch = p.name?.toLowerCase().includes(q);
-      const diagMatch = p.diagnosis?.toLowerCase().includes(q);
-      return nameMatch || diagMatch;
+      return true;
     });
   }, [patients, search, viewFilter]);
 
@@ -103,15 +109,22 @@ const Dashboard = () => {
     }
   };
 
-  // Eliminar paciente (DELETE)
+  // ELIMINAR PACIENTE (SOFT DELETE -> Cambia a hidden=true sin borrar de la BD)
   const handleDeletePatient = async (id) => {
+    const patient = patients.find((p) => p.id === id);
+    if (!patient) return;
+
+    const updatedPatient = { ...patient, hidden: true };
+
     try {
       const res = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPatient),
       });
       if (res.ok) fetchPatients();
     } catch (err) {
-      console.error("Error al eliminar:", err);
+      console.error("Error al ocultar/eliminar paciente:", err);
     }
   };
 
@@ -184,7 +197,7 @@ const Dashboard = () => {
       </div>
 
       <section className="stats-grid">
-        <StatCard title="Total de pacientes" value={patients.length} icon={Users} />
+        <StatCard title="Total de pacientes" value={patients.filter(p => !p.hidden).length} icon={Users} />
         <StatCard
           title="Alertas de recarga"
           value={urgentPatients.length}
@@ -226,7 +239,7 @@ const Dashboard = () => {
               <Search size={18} />
               <input
                 type="text"
-                placeholder="Buscar paciente..."
+                placeholder="Buscar paciente por nombre o diagnóstico..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />

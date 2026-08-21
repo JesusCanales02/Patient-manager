@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# PEGA AQUÍ LA CADENA QUE COPIASTE DE SUPABASE
+# Cadena de conexión a Supabase
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres.dgbanpalylbtmaihrfib:farmacia123!@aws-0-us-west-2.pooler.supabase.com:6543/postgres')
 
 def get_db_connection():
@@ -120,11 +120,12 @@ def delete_patient(patient_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM patients WHERE id = %s", (patient_id,))
+        # EN LUGAR DE ELIMINAR (DELETE FROM), MARCAMOS COMO OCULTO (hidden = 1)
+        cursor.execute("UPDATE patients SET hidden = 1 WHERE id = %s", (patient_id,))
         conn.commit()
         cursor.close()
         conn.close()
-        return jsonify({'message': 'Paciente eliminado'}), 200
+        return jsonify({'message': 'Paciente ocultado/archivado exitosamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
