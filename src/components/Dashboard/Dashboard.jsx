@@ -20,39 +20,53 @@ const Dashboard = () => {
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
-      setPatients(data);
-    } catch (err) {
-      console.error("Error al cargar pacientes:", err);
-    }
-  };
-
-useEffect(() => {
-  let isMounted = true;
-
-  const getPatientsData = async () => {
-    try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      if (isMounted) {
+      if (Array.isArray(data)) {
         setPatients(data);
+      } else {
+        console.error("La API devolvió un error:", data);
+        setPatients([]);
       }
     } catch (err) {
       console.error("Error al cargar pacientes:", err);
+      setPatients([]);
     }
   };
 
-  getPatientsData();
+  useEffect(() => {
+    let isMounted = true;
 
-  return () => {
-    isMounted = false;
-  };
-}, []);
+    const getPatientsData = async () => {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        if (isMounted) {
+          if (Array.isArray(data)) {
+            setPatients(data);
+          } else {
+            console.error("La API devolvió un error:", data);
+            setPatients([]);
+          }
+        }
+      } catch (err) {
+        console.error("Error al cargar pacientes:", err);
+        if (isMounted) setPatients([]);
+      }
+    };
+
+    getPatientsData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const urgentPatients = useMemo(() => {
+    if (!Array.isArray(patients)) return [];
     return patients.filter((p) => esRecargaUrgente(p.nextRefill));
   }, [patients]);
 
   const filteredPatients = useMemo(() => {
+    if (!Array.isArray(patients)) return [];
     const q = search.toLowerCase().trim();
 
     return patients.filter((p) => {
@@ -70,7 +84,7 @@ useEffect(() => {
     });
   }, [patients, search, viewFilter]);
 
-  // 2. Alternar oculto/visible (PUT)
+  // Alternar oculto/visible (PUT)
   const handleToggleHide = async (id) => {
     const patient = patients.find((p) => p.id === id);
     if (!patient) return;
@@ -89,7 +103,7 @@ useEffect(() => {
     }
   };
 
-  // 3. Eliminar paciente (DELETE)
+  // Eliminar paciente (DELETE)
   const handleDeletePatient = async (id) => {
     try {
       const res = await fetch(`${API_URL}/${id}`, {
@@ -101,7 +115,7 @@ useEffect(() => {
     }
   };
 
-  // 4. Agregar paciente (POST)
+  // Agregar paciente (POST)
   const handleAddPatient = async (newPatient) => {
     try {
       const res = await fetch(API_URL, {
@@ -115,7 +129,7 @@ useEffect(() => {
     }
   };
 
-  // 5. Actualizar información de paciente (PUT)
+  // Actualizar información de paciente (PUT)
   const handleUpdatePatient = async (updated) => {
     try {
       const res = await fetch(`${API_URL}/${updated.id}`, {
@@ -129,7 +143,7 @@ useEffect(() => {
     }
   };
 
-  // 6. Completar recarga (PUT)
+  // Completar recarga (PUT)
   const handleCompleteRefill = async (id) => {
     const patient = patients.find((p) => p.id === id);
     if (!patient) return;
