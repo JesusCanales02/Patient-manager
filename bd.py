@@ -12,7 +12,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres.dgbanpalylb
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
-
+##ejemplo
 def init_db():
     try:
         conn = get_db_connection()
