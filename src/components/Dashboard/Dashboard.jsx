@@ -8,7 +8,7 @@ import PatientModal from "../PatientModal/PatientModal";
 import { esRecargaUrgente } from "../../utils/patientUtils";
 import "./Dashboard.css";
 
-const API_URL = "http://127.0.0.1:5000/api/patients";
+const API_URL = "https://patient-manager-adkv.onrender.com/api/patients";
 
 const Dashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -16,7 +16,6 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [viewFilter, setViewFilter] = useState("active");
 
-  // 1. Cargar pacientes desde MySQL al iniciar
   const fetchPatients = async () => {
     try {
       const res = await fetch(API_URL);
