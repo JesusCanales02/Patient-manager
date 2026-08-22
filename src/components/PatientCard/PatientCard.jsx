@@ -22,8 +22,9 @@ const PatientCard = ({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [formData, setFormData] = useState({ ...patient });
   const [phoneError, setPhoneError] = useState("");
+  const patientDate = patient?.nextRefill || patient?.nextrefill || "";
 
-  const isUrgent = esRecargaUrgente(patient?.nextRefill);
+  const isUrgent = esRecargaUrgente(patientDate);
   const allergiesList = parseAllergies(formData.allergies);
 
   const handlePhone = (e) => {
@@ -68,6 +69,7 @@ const PatientCard = ({
       gender: formData.gender || "No decir",
       phone: finalPhone,
       allergies: cleanAllergies,
+      nextRefill: formData.nextRefill || "",
     });
     setIsEditing(false);
   };
@@ -84,7 +86,7 @@ const PatientCard = ({
       gender: patient.gender === "No decir" ? "" : patient.gender || "",
       diagnosis: patient.diagnosis || "",
       phone: rawPhone.replace(/\D/g, ""),
-      nextRefill: patient.nextRefill || "",
+      nextRefill: patientDate,
       notes: patient.notes || "",
       allergies: currentAllergies.length ? currentAllergies : [""],
     });
@@ -137,7 +139,7 @@ const PatientCard = ({
             </div>
             <div className="patient-detail">
               <Calendar size={16} />
-              <span>Próxima recarga: {patient.nextRefill || "No asignada"}</span>
+              <span>Próxima recarga: {patientDate || "No asignada"}</span>
             </div>
           </div>
 
