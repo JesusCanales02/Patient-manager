@@ -5,7 +5,7 @@ import "./PatientModal.css";
 const INITIAL_FORM = {
   name: "",
   age: "",
-  gender: "", // Vacío por defecto
+  gender: "", 
   phone: "",
   diagnosis: "",
   nextRefill: "",
@@ -22,7 +22,6 @@ const PatientModal = ({ onClose, onAddPatient }) => {
   };
 
   const handleGenderSelect = (genderValue) => {
-    // Si vuelve a presionar el mismo género, lo deselecciona (toggle)
     setFormData((prev) => ({
       ...prev,
       gender: prev.gender === genderValue ? "" : genderValue,

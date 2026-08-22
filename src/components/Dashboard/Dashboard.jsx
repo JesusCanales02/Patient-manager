@@ -8,7 +8,7 @@ import PatientModal from "../PatientModal/PatientModal";
 import { esRecargaUrgente } from "../../utils/patientUtils";
 import "./Dashboard.css";
 
-const API_URL = "https://patient-manager-adkv.onrender.com/api/patients";
+const API_URL = "/api/patients";
 
 const Dashboard = () => {
   const [patients, setPatients] = useState([]);
@@ -76,12 +76,9 @@ const Dashboard = () => {
       const diagMatch = p.diagnosis?.toLowerCase().includes(q);
       const matchesSearch = nameMatch || diagMatch;
 
-      // SI HAY BÚSQUEDA ACTIVA: Busca en TODOS (activos y archivados/eliminados)
       if (q !== "") {
         return matchesSearch;
       }
-
-      // SI NO HAY BÚSQUEDA: Respeta los filtros normales de botones
       if (viewFilter === "active" && p.hidden) return false;
       if (viewFilter === "urgent" && (!isUrgent || p.hidden)) return false;
       if (viewFilter === "hidden" && !p.hidden) return false;
@@ -90,7 +87,6 @@ const Dashboard = () => {
     });
   }, [patients, search, viewFilter]);
 
-  // Alternar oculto/visible (PUT)
   const handleToggleHide = async (id) => {
     const patient = patients.find((p) => p.id === id);
     if (!patient) return;
@@ -109,7 +105,6 @@ const Dashboard = () => {
     }
   };
 
-  // ELIMINAR PACIENTE (SOFT DELETE -> Cambia a hidden=true sin borrar de la BD)
   const handleDeletePatient = async (id) => {
     const patient = patients.find((p) => p.id === id);
     if (!patient) return;
@@ -128,7 +123,6 @@ const Dashboard = () => {
     }
   };
 
-  // Agregar paciente (POST)
   const handleAddPatient = async (newPatient) => {
     try {
       const res = await fetch(API_URL, {
@@ -142,7 +136,6 @@ const Dashboard = () => {
     }
   };
 
-  // Actualizar información de paciente (PUT)
   const handleUpdatePatient = async (updated) => {
     try {
       const res = await fetch(`${API_URL}/${updated.id}`, {
@@ -156,7 +149,6 @@ const Dashboard = () => {
     }
   };
 
-  // Completar recarga (PUT)
   const handleCompleteRefill = async (id) => {
     const patient = patients.find((p) => p.id === id);
     if (!patient) return;

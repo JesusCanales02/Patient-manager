@@ -9,12 +9,20 @@ function App() {
     return localStorage.getItem("isAuth") === "true";
   });
 
-  const handleLogin = async (email, password) => {
-    if (email && password) {
+  const handleLogin = async (matricula, password) => {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ matricula, password }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
       localStorage.setItem("isAuth", "true");
       setIsAuthenticated(true);
     } else {
-      throw new Error("Datos inválidos");
+      throw new Error(data.error || "Matrícula o contraseña incorrectas");
     }
   };
 
