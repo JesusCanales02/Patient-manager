@@ -12,7 +12,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
-##ejemplo
+
 def init_db():
     try:
         conn = get_db_connection()
@@ -149,5 +149,30 @@ def admin_view():
     except Exception as e:
         return f"Error leyendo base de datos: {str(e)}", 500
 
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.json or {}
+        matricula = data.get('matricula')
+        password = data.get('password')
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, matricula, name FROM users WHERE matricula = %s AND password = %s",
+            (matricula, password)
+        )
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user:
+            return jsonify({'message': 'Login exitoso', 'user': user}), 200
+        else:
+            return jsonify({'error': 'Matrícula o contraseña incorrecta'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
