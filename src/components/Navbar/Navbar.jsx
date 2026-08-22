@@ -1,16 +1,13 @@
-import { Pill } from "lucide-react";
+import { LogOut } from "lucide-react";
 import "./Navbar.css";
 
-const Navbar = () => {
+const Navbar = ({ onLogout }) => {
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <div className="brand-icon">
-          <Pill size={21} />
-        </div>
-
-        <span>Priscilla Canales</span>
-      </div>
+      <button className="btn-logout" onClick={onLogout}>
+        <LogOut size={18} />
+        <span>Cerrar sesión</span>
+      </button>
     </nav>
   );
 };
