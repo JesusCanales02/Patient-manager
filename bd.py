@@ -12,53 +12,6 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 def get_db_connection():
     return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
-def init_db():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        # Crear tabla de pacientes
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS patients (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                age TEXT,
-                gender TEXT,
-                phone TEXT,
-                diagnosis TEXT,
-                allergies TEXT,
-                nextRefill TEXT,
-                notes TEXT,
-                hidden INT DEFAULT 0
-            )
-        """)
-        # Crear tabla de usuarios para el Login
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                matricula TEXT UNIQUE NOT NULL,
-                name TEXT,
-                password TEXT NOT NULL
-            )
-        """)
-        # Crear un usuario de prueba si no existe
-        cursor.execute("""
-            INSERT INTO users (matricula, name, password)
-            VALUES ('e9837', 'Usuario Pruebas', '123456')
-            ON CONFLICT (matricula) DO NOTHING;
-        """)
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        print(f"Error iniciando DB: {e}")
-
-# Manejador antes de cada petición para asegurar las tablas sin tumbar Vercel
-@app.before_request
-def setup():
-    if not getattr(app, '_got_first_request', False):
-        init_db()
-        app._got_first_request = True
-
 def format_allergies(allergies_data):
     if isinstance(allergies_data, list):
         return ", ".join(map(str, allergies_data))
@@ -155,8 +108,9 @@ def login():
 
         conn = get_db_connection()
         cursor = conn.cursor()
+        
         cursor.execute(
-            "SELECT id, matricula, name FROM users WHERE matricula = %s AND password = %s",
+            "SELECT id, matricula FROM users WHERE matricula = %s AND password = %s",
             (matricula, password)
         )
         user = cursor.fetchone()
