@@ -49,12 +49,13 @@ const Login = ({ onLogin }) => {
             <div className="input-with-icon">
               <Mail size={18} />
               <input
-                type="email"
-                placeholder="correo@ejemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+
+            type="text"
+            placeholder="Ingresa tu matrícula"
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)}
+            required
+                />
             </div>
           </div>
 
