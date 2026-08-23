@@ -65,7 +65,6 @@ const Dashboard = () => {
     return patients.filter((p) => esRecargaUrgente(p.nextRefill) && !p.hidden);
   }, [patients]);
 
-  // FILTRADO INTELIGENTE DE PACIENTES
   const filteredPatients = useMemo(() => {
     if (!Array.isArray(patients)) return [];
     const q = search.toLowerCase().trim();
@@ -179,7 +178,7 @@ const Dashboard = () => {
       <div className="dashboard-header">
         <div>
           <h1>Gestión de pacientes</h1>
-          <p>Administra pacientes y seguimiento de recargas.</p>
+          <p>Administra pacientes y su seguimiento.</p>
         </div>
 
         <button className="new-patient-btn" onClick={() => setShowModal(true)}>
@@ -231,7 +230,7 @@ const Dashboard = () => {
               <Search size={18} />
               <input
                 type="text"
-                placeholder="Buscar paciente por nombre o diagnóstico..."
+                placeholder="Buscar paciente por nombre"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />

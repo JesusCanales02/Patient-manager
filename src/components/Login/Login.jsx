@@ -45,7 +45,7 @@ const Login = ({ onLogin }) => {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label>Correo electrónico</label>
+            <label>Nombre de usuario</label>
             <div className="input-with-icon">
               <Mail size={18} />
               <input
@@ -65,7 +65,7 @@ const Login = ({ onLogin }) => {
               <Lock size={18} />
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -74,7 +74,7 @@ const Login = ({ onLogin }) => {
           </div>
 
           <button type="submit" className="btn-login" disabled={loading}>
-            {loading ? "Cargando..." : "Entrar"}
+            {loading ? "Cargando..." : "Ingresar"}
           </button>
         </form>
       </div>
