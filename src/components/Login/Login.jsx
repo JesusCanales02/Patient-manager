@@ -65,7 +65,7 @@ const Login = ({ onLogin }) => {
               <Lock size={18} />
               <input
                 type="password"
-                placeholder=""
+                placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
