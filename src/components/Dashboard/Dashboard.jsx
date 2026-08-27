@@ -178,7 +178,6 @@ const Dashboard = () => {
       <div className="dashboard-header">
         <div>
           <h1>Gestión de pacientes</h1>
-          <p>Administra pacientes y su seguimiento.</p>
         </div>
 
         <button className="new-patient-btn" onClick={() => setShowModal(true)}>
