@@ -14,7 +14,6 @@ Creada para ayudar a mi hermana a organizar la información de sus pacientes, ag
 ### Tecnologías
 React | Vite | Python - Flask | PostgreSQL - Supabase | Render
 
-<img width="947" height="505" alt="image" src="https://github.com/user-attachments/assets/d081c9a0-617b-4b45-b3ce-7bf598b2462d" />
 
 <img width="892" height="802" alt="Captura de pantalla 2026-08-22 222714" src="https://github.com/user-attachments/assets/8e1768c1-b616-4e4d-9972-8f10f3444f83" />
 <img width="310" height="422" alt="image" src="https://github.com/user-attachments/assets/11cc36af-c127-414d-9052-969b54ee775a" />
