@@ -17,3 +17,4 @@ React | Vite | Python - Flask | PostgreSQL - Supabase | Render
 
 <img width="892" height="802" alt="Captura de pantalla 2026-08-22 222714" src="https://github.com/user-attachments/assets/8e1768c1-b616-4e4d-9972-8f10f3444f83" />
 <img width="310" height="422" alt="image" src="https://github.com/user-attachments/assets/11cc36af-c127-414d-9052-969b54ee775a" />
+<img width="305" height="410" alt="image" src="https://github.com/user-attachments/assets/e67a8178-dacc-4db9-800d-a0a7250b6edf" />
